@@ -59,10 +59,17 @@ class Vz_average {
             return '<!-- You must specify an entry_id for the rating form. -->';
         }
         
-        if ($this->EE->TMPL->fetch_param('redirect')) $form_details['hidden_fields']['redirect'] = $this->EE->TMPL->fetch_param('redirect');
-        if ($this->EE->TMPL->fetch_param('form_id')) $form_details['id'] = $this->EE->TMPL->fetch_param('form_id');
-        if ($this->EE->TMPL->fetch_param('form_class')) $form_details['class'] = $this->EE->TMPL->fetch_param('form_class');
+        $form_details['id'] = $this->EE->TMPL->fetch_param('form_id');
+        $form_details['class'] = $this->EE->TMPL->fetch_param('form_class');
         
+        // Encode a bunch of variables we'll need on the other end
+        $settings['redirect'] = $this->EE->TMPL->fetch_param('redirect');
+        $settings['limit'] = $this->EE->TMPL->fetch_param('limit');
+        $settings['min'] = $this->EE->TMPL->fetch_param('min');
+        $settings['max'] = $this->EE->TMPL->fetch_param('max');
+        $form_details['hidden_fields']['form_settings'] = base64_encode(serialize($settings));
+    
+        // Generate the <form> tags
         $return = $this->EE->functions->form_declaration($form_details);
         $return .= $this->EE->TMPL->tagdata;
         $return .= '</form>';
@@ -100,20 +107,46 @@ class Vz_average {
         if ($this->EE->security->check_xid($this->EE->input->post('XID')) == FALSE)
         {
         	// No data insertion if a hash isn't found or is too old
-        	$this->functions->redirect(stripslashes($this->EE->input->post('RET')));		
+        	$this->functions->redirect($this->EE->functions->form_backtrack());		
         }
         
-        // User information for duplicate prevention
-        $ip = $this->EE->input->ip_address();
+        // Decode the form settings
+        $settings = unserialize(base64_decode($this->EE->input->post('form_settings')));
+        var_dump($settings);
+        // Store information about the user, to prevent duplicates
         $user_id = $this->EE->session->userdata('member_id');
+        $ip = $this->EE->input->ip_address();
         
-        // Add the new rating to our database
+        // If limited by member_id, make sure someone is logged in
+        if ($settings['limit'] == 'member' && !$user_id)
+        {
+            exit('Error: You must be logged in to rate this!');
+        }
+        
+        // Prevent duplicate votes, if needed
+        if ($settings['limit'] == 'ip')
+        {
+            // Delete any previous votes from this IP
+            $this->EE->db->delete('exp_vz_average', array('ip' => $ip)); 
+        }
+        else if ($settings['limit'] == 'member')
+        {
+            $this->EE->db->delete('exp_vz_average', array('user_id' => $user_id)); 
+        }
+        
+        // Keep the value within the limits
+        if ($settings['min'] && $value < intval($settings['min'])) $value = intval($settings['min']);
+        if ($settings['max'] && $value > intval($settings['max'])) $value = intval($settings['max']);
+        
+        // Prepare the row for our database
         $data = array(
             'value'     => $value,
             'entry_id'  => $entry_id,
             'user_id'   => $user_id,
             'ip'        => $ip
         );
+        
+        // Create a new row
         $sql = $this->EE->db->insert_string('exp_vz_average', $data);
         $this->EE->db->query($sql);
         
@@ -122,7 +155,6 @@ class Vz_average {
         {
             // Ajax call, send back data they can use
             $response = $this->_get_data($entry_id);
-        
             exit(json_encode($response));
         }
         else
@@ -131,7 +163,7 @@ class Vz_average {
             $this->EE->security->delete_xid();
             
             // Redirect to the specified page
-            $redirect = isset($_POST['return']) ? $_POST['return'] : $this->EE->functions->form_backtrack();
+            $redirect = isset($settings['return']) ? $settings['return'] : $this->EE->functions->form_backtrack();
             $this->EE->functions->redirect($redirect);
         }
         
@@ -163,12 +195,92 @@ class Vz_average {
             $max = $this->EE->TMPL->fetch_param('max');
             $min = $this->EE->TMPL->fetch_param('min') ? $this->EE->TMPL->fetch_param('min') : 0;
             $percent = ($data['average'] - $min) / ($max - $min) * 100;
-            return $percent;
+            return round($percent, 2);
         }
         else
         {
             return $data['average'];
         }
+    }
+
+	/**
+	 * Output the total of all ratings for the current entry
+	 */
+    public function sum()
+    {
+        // Must specify the entry id
+        if ($this->EE->TMPL->fetch_param('entry_id'))
+        {
+            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
+        }
+        else
+        {
+            return '<!-- You must specify an entry_id. -->';
+        }
+        
+        $data = $this->_get_data($entry_id);
+        
+        return $data['sum'];
+    }
+
+	/**
+	 * Output the lowest rating for the current entry
+	 */
+    public function min()
+    {
+        // Must specify the entry id
+        if ($this->EE->TMPL->fetch_param('entry_id'))
+        {
+            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
+        }
+        else
+        {
+            return '<!-- You must specify an entry_id. -->';
+        }
+        
+        $data = $this->_get_data($entry_id);
+        
+        return $data['min'];
+    }
+
+	/**
+	 * Output the highest rating for the current entry
+	 */
+    public function max()
+    {
+        // Must specify the entry id
+        if ($this->EE->TMPL->fetch_param('entry_id'))
+        {
+            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
+        }
+        else
+        {
+            return '<!-- You must specify an entry_id. -->';
+        }
+        
+        $data = $this->_get_data($entry_id);
+        
+        return $data['max'];
+    }
+
+	/**
+	 * Output the number of ratings for the current entry
+	 */
+    public function count()
+    {
+        // Must specify the entry id
+        if ($this->EE->TMPL->fetch_param('entry_id'))
+        {
+            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
+        }
+        else
+        {
+            return '<!-- You must specify an entry_id. -->';
+        }
+        
+        $data = $this->_get_data($entry_id);
+        
+        return $data['count'];
     }
 	
 	// ----------------------------------------------------------------
@@ -200,7 +312,7 @@ class Vz_average {
         }
         else
         {
-            return false;
+            return array('average' => 0, 'total' => 0, 'min' => 0, 'max' => 0, 'count' => 0);
         }
     }
 	
