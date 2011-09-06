@@ -56,7 +56,7 @@ class Vz_average {
         }
         else
         {
-            return 'You must specify an entry_id for the rating form.';
+            return '<!-- You must specify an entry_id for the rating form. -->';
         }
         
         if ($this->EE->TMPL->fetch_param('redirect')) $form_details['hidden_fields']['redirect'] = $this->EE->TMPL->fetch_param('redirect');
@@ -141,27 +141,59 @@ class Vz_average {
 	// ----------------------------------------------------------------
 
 	/**
+	 * Output the average rating for the current entry
+	 */
+    public function average()
+    {
+        // Must specify the entry id
+        if ($this->EE->TMPL->fetch_param('entry_id'))
+        {
+            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
+        }
+        else
+        {
+            return '<!-- You must specify an entry_id. -->';
+        }
+        
+        $data = $this->_get_data($entry_id);
+        
+        if ($this->EE->TMPL->fetch_param('max'))
+        {
+            // Return a percentage between the max and min
+            $max = $this->EE->TMPL->fetch_param('max');
+            $min = $this->EE->TMPL->fetch_param('min') ? $this->EE->TMPL->fetch_param('min') : 0;
+            $percent = ($data['average'] - $min) / ($max - $min) * 100;
+            return $percent;
+        }
+        else
+        {
+            return $data['average'];
+        }
+    }
+	
+	// ----------------------------------------------------------------
+
+	/**
 	 * Add up the ratings and return an average
 	 */
     private function _get_data($entry_id)
     {
         if (!$entry_id) return;
         
-        // Get all the ratings
+        // Have there been any ratings for this entry?
         $this->EE->db->where('entry_id', $entry_id);
         $count = $this->EE->db->count_all_results('exp_vz_average');
         
-        $this->EE->db->select_avg('value', 'average');
-        $this->EE->db->select_sum('value', 'total');
-        $this->EE->db->select_min('value', 'min');
-        $this->EE->db->select_max('value', 'max');
-        $this->EE->db->where('entry_id', $entry_id);
-        $query = $this->EE->db->get('exp_vz_average');
-        
-        $this->EE->db->flush_cache();
-        
-        if ($query->num_rows() > 0)
+        if ($count > 0)
         {
+            // Get all the cumulative ratings information
+            $this->EE->db->select_avg('value', 'average');
+            $this->EE->db->select_sum('value', 'total');
+            $this->EE->db->select_min('value', 'min');
+            $this->EE->db->select_max('value', 'max');
+            $this->EE->db->where('entry_id', $entry_id);
+            $query = $this->EE->db->get('exp_vz_average');
+            
             $data = $query->row_array();
             $data['count'] = $count;
             return $data;
