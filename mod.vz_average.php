@@ -39,42 +39,6 @@ class Vz_average {
 	// ----------------------------------------------------------------
 
 	/**
-	 * Handle the action url for rating and entry
-	 */
-    public function rate()
-    {
-        // Validate our data
-        if (isset($_POST['entry_id']) && ctype_digit($_POST['entry_id']))
-        {
-            $entry_id = intval($_POST['entry_id'], 10);
-        }
-        else
-        {
-            exit('Error: You must supply a valid entry id.');
-        }
-        
-        if (isset($_POST['rating']) && is_numeric($_POST['rating']))
-        {
-            $rating = intval($_POST['rating'], 10);
-        }
-        else
-        {
-            exit('Error: You must supply a numeric rating value.');
-        }
-        
-        // Secure Forms check
-        if ($this->EE->security->secure_forms_check($this->EE->input->post('XID')) == FALSE)
-        {
-        	// No data insertion if a hash isn't found or is too old
-        	$this->functions->redirect(stripslashes($this->EE->input->post('RET')));		
-        }
-        
-        exit(strval($rating));
-    }
-	
-	// ----------------------------------------------------------------
-
-	/**
 	 * Rating form template tag
 	 */
     public function form()
@@ -104,6 +68,108 @@ class Vz_average {
         $return .= '</form>';
         
         return $return;
+    }
+	
+	// ----------------------------------------------------------------
+
+	/**
+	 * Handle the action url for rating and entry
+	 */
+    public function rate()
+    {
+        // Validate our data
+        if (isset($_POST['entry_id']) && ctype_digit($_POST['entry_id']))
+        {
+            $entry_id = intval($_POST['entry_id'], 10);
+        }
+        else
+        {
+            exit('Error: You must supply a valid entry id.');
+        }
+        
+        if (isset($_POST['value']) && is_numeric($_POST['value']))
+        {
+            $value = intval($_POST['value'], 10);
+        }
+        else
+        {
+            exit('Error: You must supply a numeric rating value.');
+        }
+        
+        // Make sure it's a valid POST from the front-end
+        if ($this->EE->security->check_xid($this->EE->input->post('XID')) == FALSE)
+        {
+        	// No data insertion if a hash isn't found or is too old
+        	$this->functions->redirect(stripslashes($this->EE->input->post('RET')));		
+        }
+        
+        // User information for duplicate prevention
+        $ip = $this->EE->input->ip_address();
+        $user_id = $this->EE->session->userdata('member_id');
+        
+        // Add the new rating to our database
+        $data = array(
+            'value'     => $value,
+            'entry_id'  => $entry_id,
+            'user_id'   => $user_id,
+            'ip'        => $ip
+        );
+        $sql = $this->EE->db->insert_string('exp_vz_average', $data);
+        $this->EE->db->query($sql);
+        
+        // Okay, now get ready to send back a response
+        if (true || AJAX_REQUEST)
+        {
+            // Ajax call, send back data they can use
+            $response = $this->_get_data($entry_id);
+        
+            exit(json_encode($response));
+        }
+        else
+        {
+            // Remove their XID hash
+            $this->EE->security->delete_xid();
+            
+            // Redirect to the specified page
+            $redirect = isset($_POST['return']) ? $_POST['return'] : $this->EE->functions->form_backtrack();
+            $this->EE->functions->redirect($redirect);
+        }
+        
+        exit;
+    }
+	
+	// ----------------------------------------------------------------
+
+	/**
+	 * Add up the ratings and return an average
+	 */
+    private function _get_data($entry_id)
+    {
+        if (!$entry_id) return;
+        
+        // Get all the ratings
+        $this->EE->db->where('entry_id', $entry_id);
+        $count = $this->EE->db->count_all_results('exp_vz_average');
+        
+        $this->EE->db->select_avg('value', 'average');
+        $this->EE->db->select_sum('value', 'total');
+        $this->EE->db->select_min('value', 'min');
+        $this->EE->db->select_max('value', 'max');
+        $this->EE->db->where('entry_id', $entry_id);
+        $query = $this->EE->db->get('exp_vz_average');
+        
+        $this->EE->db->flush_cache();
+        
+        if ($query->num_rows() > 0)
+        {
+            $data = $query->row_array();
+            $data['count'] = $count;
+            return $data;
+        }
+        else
+        {
+            return false;
+        }
     }
 	
 }
