@@ -129,11 +129,11 @@ class Vz_average {
         if ($settings['limit'] == 'ip')
         {
             // Delete any previous votes from this IP
-            $this->EE->db->delete('exp_vz_average', array('ip' => $ip)); 
+            $this->EE->db->delete('exp_vz_average', array('ip' => $ip, 'entry_id' =>$entry_id)); 
         }
         else if ($settings['limit'] == 'member')
         {
-            $this->EE->db->delete('exp_vz_average', array('user_id' => $user_id)); 
+            $this->EE->db->delete('exp_vz_average', array('user_id' => $user_id, 'entry_id' =>$entry_id)); 
         }
         
         // Keep the value within the limits
@@ -187,7 +187,7 @@ class Vz_average {
         }
         
         // Okay, now get ready to send back a response
-        if (true || AJAX_REQUEST)
+        if (AJAX_REQUEST)
         {
             // Ajax call, send back data they can use
             exit(json_encode($cumulative));
@@ -234,7 +234,7 @@ class Vz_average {
         }
         else
         {
-            return $data['average'];
+            return round($data['average']);
         }
     }
 
