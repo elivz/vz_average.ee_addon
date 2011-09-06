@@ -63,6 +63,8 @@ class Vz_average {
         $form_details['class'] = $this->EE->TMPL->fetch_param('form_class');
         
         // Encode a bunch of variables we'll need on the other end
+        $settings['update_field'] = $this->EE->TMPL->fetch_param('update_field');
+        $settings['update_with'] = $this->EE->TMPL->fetch_param('update_with');
         $settings['redirect'] = $this->EE->TMPL->fetch_param('redirect');
         $settings['limit'] = $this->EE->TMPL->fetch_param('limit');
         $settings['min'] = $this->EE->TMPL->fetch_param('min');
@@ -112,7 +114,7 @@ class Vz_average {
         
         // Decode the form settings
         $settings = unserialize(base64_decode($this->EE->input->post('form_settings')));
-        var_dump($settings);
+        
         // Store information about the user, to prevent duplicates
         $user_id = $this->EE->session->userdata('member_id');
         $ip = $this->EE->input->ip_address();
@@ -146,16 +148,49 @@ class Vz_average {
             'ip'        => $ip
         );
         
-        // Create a new row
+        // Create the new row
         $sql = $this->EE->db->insert_string('exp_vz_average', $data);
         $this->EE->db->query($sql);
+        
+        // Recalculate the cumulative data
+        $cumulative = $this->_get_data($entry_id);
+        
+        // Do we need to update a custom field?
+        if ($settings['update_field'])
+        {
+            // Get the field ID
+            $this->EE->db->select('field_id');
+            $query = $this->EE->db->get_where(
+                'exp_channel_fields',
+                array(
+                    'field_name' => $settings['update_field'],
+                    'site_id' => $this->EE->input->post('site_id')
+                ),
+                1
+            );
+            
+            // If that field exists….
+            if ($query->num_rows() > 0)
+            {
+                $row = $query->row();
+                $field_id = $row->field_id;
+                
+                $type = in_array($settings['update_with'], array('average', 'total', 'min', 'max', 'count')) ? $settings['update_with'] : 'average';
+                
+                // Update the field
+                $this->EE->db->update(
+                    'exp_channel_data',
+                    array('field_id_'.$field_id => $cumulative[$type]),
+                    array('entry_id' => $entry_id, 'site_id' => $this->EE->input->post('site_id'))
+                );
+            }
+        }
         
         // Okay, now get ready to send back a response
         if (true || AJAX_REQUEST)
         {
             // Ajax call, send back data they can use
-            $response = $this->_get_data($entry_id);
-            exit(json_encode($response));
+            exit(json_encode($cumulative));
         }
         else
         {
