@@ -59,6 +59,8 @@ class Vz_average {
             return '<!-- You must specify an entry_id for the rating form. -->';
         }
         
+        $form_details['hidden_fields']['entry_type'] = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        
         $form_details['id'] = $this->EE->TMPL->fetch_param('form_id');
         $form_details['class'] = $this->EE->TMPL->fetch_param('form_class');
         
@@ -105,6 +107,9 @@ class Vz_average {
             exit('Error: You must supply a numeric rating value.');
         }
         
+        // The type of entry they are rating
+        $entry_type = $this->EE->input->post('entry_type', TRUE);
+        
         // Make sure it's a valid POST from the front-end
         if ($this->EE->security->check_xid($this->EE->input->post('XID')) == FALSE)
         {
@@ -144,6 +149,7 @@ class Vz_average {
         $data = array(
             'value'     => $value,
             'entry_id'  => $entry_id,
+            'entry_type'=> $entry_type,
             'user_id'   => $user_id,
             'ip'        => $ip
         );
@@ -153,7 +159,7 @@ class Vz_average {
         $this->EE->db->query($sql);
         
         // Recalculate the cumulative data
-        $cumulative = $this->_get_data($entry_id);
+        $cumulative = $this->_get_data($entry_id, $entry_type);
         
         // Do we need to update a custom field?
         if ($settings['update_field'])
@@ -222,7 +228,8 @@ class Vz_average {
             return '<!-- You must specify an entry_id. -->';
         }
         
-        $data = $this->_get_data($entry_id);
+        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        $data = $this->_get_data($entry_id, $entry_type);
         
         if ($this->EE->TMPL->fetch_param('max'))
         {
@@ -253,7 +260,8 @@ class Vz_average {
             return '<!-- You must specify an entry_id. -->';
         }
         
-        $data = $this->_get_data($entry_id);
+        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        $data = $this->_get_data($entry_id, $entry_type);
         
         return $data['sum'];
     }
@@ -273,7 +281,8 @@ class Vz_average {
             return '<!-- You must specify an entry_id. -->';
         }
         
-        $data = $this->_get_data($entry_id);
+        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        $data = $this->_get_data($entry_id, $entry_type);
         
         return $data['min'];
     }
@@ -293,7 +302,8 @@ class Vz_average {
             return '<!-- You must specify an entry_id. -->';
         }
         
-        $data = $this->_get_data($entry_id);
+        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        $data = $this->_get_data($entry_id, $entry_type);
         
         return $data['max'];
     }
@@ -313,7 +323,8 @@ class Vz_average {
             return '<!-- You must specify an entry_id. -->';
         }
         
-        $data = $this->_get_data($entry_id);
+        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        $data = $this->_get_data($entry_id, $entry_type);
         
         return $data['count'];
     }
@@ -323,12 +334,13 @@ class Vz_average {
 	/**
 	 * Add up the ratings and return an average
 	 */
-    private function _get_data($entry_id)
+    private function _get_data($entry_id, $entry_type)
     {
-        if (!$entry_id) return;
+        if (!$entry_id || !$entry_id) return;
         
         // Have there been any ratings for this entry?
         $this->EE->db->where('entry_id', $entry_id);
+        $this->EE->db->where('entry_type', $entry_type);
         $count = $this->EE->db->count_all_results('exp_vz_average');
         
         if ($count > 0)
@@ -339,6 +351,7 @@ class Vz_average {
             $this->EE->db->select_min('value', 'min');
             $this->EE->db->select_max('value', 'max');
             $this->EE->db->where('entry_id', $entry_id);
+            $this->EE->db->where('entry_type', $entry_type);
             $query = $this->EE->db->get('exp_vz_average');
             
             $data = $query->row_array();

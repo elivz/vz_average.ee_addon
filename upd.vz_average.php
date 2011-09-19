@@ -67,6 +67,7 @@ class Vz_average_upd {
         $fields = array(
             'value'     => array('type' => 'int', 'constraint' => '9'),
             'entry_id'  => array('type' => 'int', 'constraint' => '9', 'unsigned' => TRUE),
+            'entry_type'=> array('type' => 'varchar', 'constraint' => '20'),
             'date'      => array('type' => "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
             'user_id'   => array('type' => 'int', 'constraint' => '9', 'unsigned' => TRUE, 'null' => TRUE),
             'ip'        => array('type' => 'varchar', 'constraint' => '15', 'null' => TRUE)
