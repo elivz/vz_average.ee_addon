@@ -1,16 +1,4 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-/**
- * ExpressionEngine - by EllisLab
- *
- * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
- * @license		http://expressionengine.com/user_guide/license.html
- * @link		http://expressionengine.com
- * @since		Version 2.0
- * @filesource
- */
  
 // ------------------------------------------------------------------------
 
@@ -22,7 +10,11 @@
  * @category	Module
  * @author		Eli Van Zoeren
  * @link		http://elivz.com
+ * @copyright   Copyright (c) 2012 Eli Van Zoeren
+ * @license     http://creativecommons.org/licenses/by-sa/3.0/ Attribution-Share Alike 3.0 Unported
  */
+ 
+// ------------------------------------------------------------------------
 
 class Vz_average_mcp {
 	
