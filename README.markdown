@@ -5,7 +5,7 @@ VZ Average
 
 VZ Average is a flexible and  minimal framework for rating or tallying anything in EE that you can identify with an ID: a channel entry, a comment, a Matrix row, or anything else. A few possible uses for it include: star ratings, thumbs up/down ratings, flagging comments as offensive, voting, etc. 
 
-It provides a simple template tag that generates a form for submitting ratings, plus several tags to display data about the ratings. I have avoided outputting any UI (unlike the other ratings add-ons out there), focussing instead on providing a abstracted data store that you can use imaginatively to achieve a wide range of effects.
+It provides a simple template tag that generates a form for submitting ratings, plus several tags to display data about the ratings. I have avoided outputting any UI (unlike the other ratings add-ons out there), focussing instead on providing an abstracted data store that you can use imaginatively to achieve a wide range of effects.
 
 When used to rate a channel entry, VZ Average can also update a custom field with the average, sum, minimum, maximum, or total number of ratings. Although any of these can also be output using VZ Average's template tags, mirroring them into a custom field will allow you to search or sort entries based on the number.
 
