@@ -26,7 +26,7 @@
 
 class Vz_average_upd {
 	
-	public $version = '1.0.1';
+	public $version = '0.5.0';
 	
 	private $EE;
 	
@@ -89,26 +89,26 @@ class Vz_average_upd {
 	 */	
 	public function uninstall()
 	{
-		$mod_id = $this->EE->db->select('module_id')
-								->get_where('modules', array(
-									'module_name'	=> 'Vz_average'
-								))->row('module_id');
+        $mod_id = $this->EE->db->select('module_id')
+					->get_where('modules', array(
+						'module_name'	=> 'Vz_average'
+					))->row('module_id');
 		
-		$this->EE->db->where('module_id', $mod_id)
-					 ->delete('module_member_groups');
+        $this->EE->db->where('module_id', $mod_id)
+                    ->delete('module_member_groups');
 		
-		$this->EE->db->where('module_name', 'Vz_average')
-					 ->delete('modules');
+        $this->EE->db->where('module_name', 'Vz_average')
+                    ->delete('modules');
 		
-		// Remove our custom action
+        // Remove our custom action
         $this->EE->db->where('class', 'Vz_average');
         $this->EE->db->delete('actions');
-		
-		// Remove the data table
-		$this->EE->load->dbforge();
-		$this->EE->dbforge->drop_table('vz_average');
-		
-		return TRUE;
+        
+        // Remove the data table
+        $this->EE->load->dbforge();
+        $this->EE->dbforge->drop_table('vz_average');
+        
+        return TRUE;
 	}
 	
 	// ----------------------------------------------------------------
@@ -120,8 +120,8 @@ class Vz_average_upd {
 	 */	
 	public function update($current = '')
 	{
-		// If you have updates, drop 'em in here.
-		return TRUE;
+        // If you have updates, drop 'em in here.
+        return TRUE;
 	}
 	
 }

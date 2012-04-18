@@ -61,6 +61,7 @@ class Vz_average {
         
         $form_details['hidden_fields']['entry_type'] = $this->EE->TMPL->fetch_param('entry_type', 'channel');
         
+        // Form parameters
         $form_details['id'] = $this->EE->TMPL->fetch_param('form_id');
         $form_details['class'] = $this->EE->TMPL->fetch_param('form_class');
         
@@ -68,9 +69,10 @@ class Vz_average {
         $settings['update_field'] = $this->EE->TMPL->fetch_param('update_field');
         $settings['update_with'] = $this->EE->TMPL->fetch_param('update_with');
         $settings['redirect'] = $this->EE->TMPL->fetch_param('redirect');
-        $settings['limit'] = $this->EE->TMPL->fetch_param('limit');
+        $settings['limit_by'] = $this->EE->TMPL->fetch_param('limit_by');
         $settings['min'] = $this->EE->TMPL->fetch_param('min');
         $settings['max'] = $this->EE->TMPL->fetch_param('max');
+        $settings['return'] = $this->EE->TMPL->fetch_param('return');
         $form_details['hidden_fields']['form_settings'] = base64_encode(serialize($settings));
     
         // Generate the <form> tags
@@ -125,18 +127,18 @@ class Vz_average {
         $ip = $this->EE->input->ip_address();
         
         // If limited by member_id, make sure someone is logged in
-        if ($settings['limit'] == 'member' && !$user_id)
+        if ($settings['limit_by'] == 'member' && !$user_id)
         {
             exit('Error: You must be logged in to rate this!');
         }
         
         // Prevent duplicate votes, if needed
-        if ($settings['limit'] == 'ip')
+        if ($settings['limit_by'] == 'ip')
         {
             // Delete any previous votes from this IP
             $this->EE->db->delete('exp_vz_average', array('ip' => $ip, 'entry_id' =>$entry_id)); 
         }
-        else if ($settings['limit'] == 'member')
+        else if ($settings['limit_by'] == 'member')
         {
             $this->EE->db->delete('exp_vz_average', array('user_id' => $user_id, 'entry_id' =>$entry_id)); 
         }
@@ -162,7 +164,7 @@ class Vz_average {
         $cumulative = $this->_get_data($entry_id, $entry_type);
         
         // Do we need to update a custom field?
-        if ($settings['update_field'])
+        if ($entry_type == 'channel' && $settings['update_field'])
         {
             // Get the field ID
             $this->EE->db->select('field_id');
@@ -181,7 +183,7 @@ class Vz_average {
                 $row = $query->row();
                 $field_id = $row->field_id;
                 
-                $type = in_array($settings['update_with'], array('average', 'total', 'min', 'max', 'count')) ? $settings['update_with'] : 'average';
+                $type = in_array($settings['update_with'], array('average', 'sum', 'min', 'max', 'count')) ? $settings['update_with'] : 'average';
                 
                 // Update the field
                 $this->EE->db->update(
@@ -204,7 +206,7 @@ class Vz_average {
             $this->EE->security->delete_xid();
             
             // Redirect to the specified page
-            $redirect = isset($settings['return']) ? $settings['return'] : $this->EE->functions->form_backtrack();
+            $redirect = !empty($settings['return']) ? $settings['return'] : $this->EE->functions->form_backtrack();
             $this->EE->functions->redirect($redirect);
         }
         
@@ -347,7 +349,7 @@ class Vz_average {
         {
             // Get all the cumulative ratings information
             $this->EE->db->select_avg('value', 'average');
-            $this->EE->db->select_sum('value', 'total');
+            $this->EE->db->select_sum('value', 'sum');
             $this->EE->db->select_min('value', 'min');
             $this->EE->db->select_max('value', 'max');
             $this->EE->db->where('entry_id', $entry_id);
@@ -360,7 +362,7 @@ class Vz_average {
         }
         else
         {
-            return array('average' => 0, 'total' => 0, 'min' => 0, 'max' => 0, 'count' => 0);
+            return array('average' => 0, 'sum' => 0, 'min' => 0, 'max' => 0, 'count' => 0);
         }
     }
 	

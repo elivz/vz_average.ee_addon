@@ -35,14 +35,7 @@ class Vz_average_mcp {
 	 */
 	public function __construct()
 	{
-		$this->EE =& get_instance();
-		
-		$this->_base_url = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=vz_average';
-		
-		$this->EE->cp->set_right_nav(array(
-			'module_home'	=> $this->_base_url,
-			// Add more right nav items here.
-		));
+        $this->EE =& get_instance();
 	}
 	
 	// ----------------------------------------------------------------
@@ -54,12 +47,11 @@ class Vz_average_mcp {
 	 */
 	public function index()
 	{
-		$this->EE->cp->set_variable('cp_page_title', 
-								lang('vz_average_module_name'));
+        $this->EE->cp->set_variable('cp_page_title', lang('vz_average_module_name'));
 		
 		/**
-		 * No control panel page is necessary
-		 */		
+		 * No control panel page yet
+		 **/		
 	}
 	
 }
