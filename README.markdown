@@ -3,7 +3,7 @@ VZ Average
 
 *This is beta software, use at your own risk. But please send along suggestions and bug reports.*
 
-VZ Average is a flexible and  minimal framework for rating anything in EE that you can identify with an ID: a channel entry, a comment, a Matrix row, or anything else. A few possible uses for it include: star ratings, thumbs up/down ratings, flagging comments as offensive, tallying up votes, etc. 
+VZ Average is a flexible and  minimal framework for rating or tallying anything in EE that you can identify with an ID: a channel entry, a comment, a Matrix row, or anything else. A few possible uses for it include: star ratings, thumbs up/down ratings, flagging comments as offensive, voting, etc. 
 
 It provides a simple template tag that generates a form for submitting ratings, plus several tags to display data about the ratings. I have avoided outputting any UI (unlike the other ratings add-ons out there), focussing instead on providing a abstracted data store that you can use imaginatively to achieve a wide range of effects.
 
@@ -178,3 +178,4 @@ In no particular order, these are features I hope to add in the relatively near 
 * Use the current entry if no entry_id is set.
 * Template tags providing access to the current user's previous ratings.
 * Support the `secure_action` parameter for SSL pages.
+* MSM support
