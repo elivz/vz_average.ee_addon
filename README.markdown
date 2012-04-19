@@ -85,7 +85,7 @@ In a multi-site environment, set this to the ID number of the current site. Defa
 
 ### current_by = [ip|member]
 
-Only show data for the current user, as determined by either IP address or member ID.
+Only show data for the current user, as determined by either IP address or logged in member ID. If you set this to `member` and there is no logged in member, all tags will return `0`.
 
 ### member_id = [integer]
 
