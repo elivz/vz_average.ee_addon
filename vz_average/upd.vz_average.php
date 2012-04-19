@@ -18,7 +18,7 @@
 
 class Vz_average_upd {
 	
-	public $version = '0.5.0';
+	public $version = '0.6.0';
 	
 	private $EE;
 	
@@ -57,12 +57,13 @@ class Vz_average_upd {
 		// Create a new table to hold our data
         $this->EE->load->dbforge();
         $fields = array(
-            'value'     => array('type' => 'int', 'constraint' => '9'),
-            'entry_id'  => array('type' => 'int', 'constraint' => '9', 'unsigned' => TRUE),
-            'entry_type'=> array('type' => 'varchar', 'constraint' => '20'),
+            'value'     => array('type' => 'int', 'constraint' => 5),
+            'entry_id'  => array('type' => 'int', 'constraint' => 5, 'unsigned' => TRUE),
+            'entry_type'=> array('type' => 'varchar', 'constraint' => 20),
+            'site_id'   => array('type' => 'int', 'constraint' => 5, 'unsigned' => TRUE),
             'date'      => array('type' => "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
-            'user_id'   => array('type' => 'int', 'constraint' => '9', 'unsigned' => TRUE, 'null' => TRUE),
-            'ip'        => array('type' => 'varchar', 'constraint' => '15', 'null' => TRUE)
+            'user_id'   => array('type' => 'int', 'constraint' => 5, 'unsigned' => TRUE, 'null' => TRUE),
+            'ip'        => array('type' => 'varchar', 'constraint' => 15, 'null' => TRUE)
         );
         $this->EE->dbforge->add_field('id');
         $this->EE->dbforge->add_field($fields);
@@ -110,11 +111,26 @@ class Vz_average_upd {
 	 *
 	 * @return 	boolean 	TRUE
 	 */	
-	public function update($current = '')
+	public function update($current='')
 	{
-        // If you have updates, drop 'em in here.
+		if ($this->version == $current) return FALSE;
+		
+        $this->EE->load->dbforge();
+        
+        if (version_compare($current, '0.6', '<')) $this->_update_060();
+    
         return TRUE;
 	}
+	
+	/**
+	 * Add 'site_id' database column
+	 */
+	private function _update_060()
+	{	
+        $this->EE->dbforge->add_column('vz_average', array(
+        	'site_id' => array('type' => 'int', 'constraint' => 5, 'null' => FALSE),
+        ), 'entry_type');
+    }
 	
 }
 /* End of file upd.vz_average.php */

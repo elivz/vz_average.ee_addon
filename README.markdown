@@ -178,4 +178,4 @@ In no particular order, these are features I hope to add in the relatively near 
 * Use the current entry if no entry_id is set.
 * Template tags providing access to the current user's previous ratings.
 * Support the `secure_action` parameter for SSL pages.
-* MSM support
+* Hooks (what do y'all want?)

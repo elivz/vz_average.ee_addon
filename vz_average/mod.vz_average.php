@@ -52,19 +52,19 @@ class Vz_average {
         }
         
         $form_details['hidden_fields']['entry_type'] = $this->EE->TMPL->fetch_param('entry_type', 'channel');
+        $form_details['hidden_fields']['site_id'] = $this->EE->TMPL->fetch_param('site_id', '1');
         
         // Form parameters
         $form_details['id'] = $this->EE->TMPL->fetch_param('form_id');
         $form_details['class'] = $this->EE->TMPL->fetch_param('form_class');
         
         // Encode a bunch of variables we'll need on the other end
-        $settings['update_field'] = $this->EE->TMPL->fetch_param('update_field');
-        $settings['update_with'] = $this->EE->TMPL->fetch_param('update_with');
-        $settings['redirect'] = $this->EE->TMPL->fetch_param('redirect');
+        $settings['return'] = $this->EE->TMPL->fetch_param('return');
         $settings['limit_by'] = $this->EE->TMPL->fetch_param('limit_by');
         $settings['min'] = $this->EE->TMPL->fetch_param('min');
         $settings['max'] = $this->EE->TMPL->fetch_param('max');
-        $settings['return'] = $this->EE->TMPL->fetch_param('return');
+        $settings['update_field'] = $this->EE->TMPL->fetch_param('update_field');
+        $settings['update_with'] = $this->EE->TMPL->fetch_param('update_with');
         $form_details['hidden_fields']['form_settings'] = base64_encode(serialize($settings));
     
         // Generate the <form> tags
@@ -83,28 +83,31 @@ class Vz_average {
     public function rate()
     {
         // Validate our data
-        if (isset($_POST['entry_id']) && ctype_digit($_POST['entry_id']))
+        $entry_id = $this->EE->input->post('entry_id');
+        if (!empty($entry_id) && ctype_digit($entry_id))
         {
-            $entry_id = intval($_POST['entry_id'], 10);
+            $entry_id = intval($entry_id, 10);
         }
         else
         {
             exit('Error: You must supply a valid entry id.');
         }
         
-        if (isset($_POST['value']) && is_numeric($_POST['value']))
+        $value = $this->EE->input->post('value');
+        if (!empty($value) && is_numeric($value))
         {
-            $value = intval($_POST['value'], 10);
+            $value = intval($value, 10);
         }
         else
         {
             exit('Error: You must supply a numeric rating value.');
         }
         
-        // The type of entry they are rating
-        $entry_type = $this->EE->input->post('entry_type', TRUE);
+        // Differentiate between duplicate IDs
+        $entry_type = $this->EE->input->post('entry_type');
+        $site_id = $this->EE->input->post('site_id');
         
-        // Make sure it's a valid POST from the front-end
+        // Make sure it is a valid POST from the front-end
         if ($this->EE->security->check_xid($this->EE->input->post('XID')) == FALSE)
         {
         	// No data insertion if a hash isn't found or is too old
@@ -144,6 +147,7 @@ class Vz_average {
             'value'     => $value,
             'entry_id'  => $entry_id,
             'entry_type'=> $entry_type,
+            'site_id'   => $site_id,
             'user_id'   => $user_id,
             'ip'        => $ip
         );
