@@ -42,7 +42,7 @@ class Vz_average {
             'secure' => TRUE
         );
         
-        if ($this->EE->TMPL->fetch_param('entry_id'))
+        if ($this->EE->TMPL->fetch_param('entry_id', FALSE))
         {
             $form_details['hidden_fields']['entry_id'] = $this->EE->TMPL->fetch_param('entry_id');
         }
@@ -60,6 +60,7 @@ class Vz_average {
         
         // Encode a bunch of variables we'll need on the other end
         $settings['return'] = $this->EE->TMPL->fetch_param('return');
+        $settings['secure_return'] = $this->EE->TMPL->fetch_param('secure_return');
         $settings['limit_by'] = $this->EE->TMPL->fetch_param('limit_by');
         $settings['min'] = $this->EE->TMPL->fetch_param('min');
         $settings['max'] = $this->EE->TMPL->fetch_param('max');
@@ -202,7 +203,16 @@ class Vz_average {
             $this->EE->security->delete_xid();
             
             // Redirect to the specified page
-            $redirect = !empty($settings['return']) ? $settings['return'] : $this->EE->functions->form_backtrack();
+            $redirect = !empty($settings['return']) ?
+                $this->EE->functions->create_url($settings['return']) :
+                $this->EE->functions->form_backtrack();
+            
+            // Use the https version if they set 'secure_return'
+            if ($settings['secure_return'] == 'yes')
+            {
+                $redirect = str_replace('http://', 'https://', $redirect);
+            }
+            
             $this->EE->functions->redirect($redirect);
         }
         

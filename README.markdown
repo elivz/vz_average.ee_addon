@@ -29,6 +29,10 @@ This tag pair generates the form that you will use to submit a new rating. It on
 
 This is essentially a namespace for the `entry_id`. If you are storing ratings for both channel entries and comments, there is a good chance their IDs will overlap, so you would set `entry_type="comment"` for the comment rating forms to keep their data separate. You can use any and as many entry_types as you see fit.
 
+### site_id = [integer]
+
+In a multi-site environment, set this to the ID number of the current site. Defaults to 1.
+
 ### form_id, form_class
 
 These simply set their respective HTML attributes on the form tag, for styling or Javascript purposes.
@@ -36,6 +40,10 @@ These simply set their respective HTML attributes on the form tag, for styling o
 ### return
 
 The path to redirect to after the form is submitted. If this parameter is not set, it will default to returning to the current page.
+
+### secure_return = "yes"
+
+If you set `secure_return="yes"` the visitor will be sent to the "https" version of the return URL after submitting the form.
 
 ### limit_by = [ip|member]
 
