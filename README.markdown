@@ -71,13 +71,21 @@ The type of calculation to save in the custom field. This can be one of: `averag
 
 All of these retrieve calculated values for a particular entry. They each take the same two paramters:
 
-### entry_id
+### entry_id = [integer]
 
 (required) The unique ID of the entry to be displayed.
 
-### entry_type
+### entry_type = [string]
 
 The type of entry to be displayed. This defaults to `channel`.
+
+### site_id = [integer]
+
+In a multi-site environment, set this to the ID number of the current site. Defaults to 1.
+
+### decimals = [integer] (only for {exp:vz_average:average})
+
+The number of decimal places to round the average to. Defaults to 0 (displays whole numbers).
 
 ### min, max (only for {exp:vz_average:average})
 
@@ -185,5 +193,4 @@ In no particular order, these are features I hope to add in the relatively near 
 * More/better code examples for different scenarios.
 * Use the current entry if no entry_id is set.
 * Template tags providing access to the current user's previous ratings.
-* Support the `secure_action` parameter for SSL pages.
 * Hooks (what do y'all want?)

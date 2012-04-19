@@ -226,18 +226,8 @@ class Vz_average {
 	 */
     public function average()
     {
-        // Must specify the entry id
-        if ($this->EE->TMPL->fetch_param('entry_id'))
-        {
-            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
-        }
-        else
-        {
-            return '<!-- You must specify an entry_id. -->';
-        }
-        
-        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
-        $data = $this->_get_data($entry_id, $entry_type);
+        $precision = $this->EE->TMPL->fetch_param('decimals', 0);
+        $data = $this->_get_data();
         
         if ($this->EE->TMPL->fetch_param('max'))
         {
@@ -245,11 +235,11 @@ class Vz_average {
             $max = $this->EE->TMPL->fetch_param('max');
             $min = $this->EE->TMPL->fetch_param('min') ? $this->EE->TMPL->fetch_param('min') : 0;
             $percent = ($data['average'] - $min) / ($max - $min) * 100;
-            return round($percent, 2);
+            return round($percent, $precision);
         }
         else
         {
-            return round($data['average']);
+            return round($data['average'], $precision);
         }
     }
 
@@ -258,19 +248,7 @@ class Vz_average {
 	 */
     public function sum()
     {
-        // Must specify the entry id
-        if ($this->EE->TMPL->fetch_param('entry_id'))
-        {
-            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
-        }
-        else
-        {
-            return '<!-- You must specify an entry_id. -->';
-        }
-        
-        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
-        $data = $this->_get_data($entry_id, $entry_type);
-        
+        $data = $this->_get_data();
         return $data['sum'];
     }
 
@@ -279,19 +257,7 @@ class Vz_average {
 	 */
     public function min()
     {
-        // Must specify the entry id
-        if ($this->EE->TMPL->fetch_param('entry_id'))
-        {
-            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
-        }
-        else
-        {
-            return '<!-- You must specify an entry_id. -->';
-        }
-        
-        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
-        $data = $this->_get_data($entry_id, $entry_type);
-        
+        $data = $this->_get_data();
         return $data['min'];
     }
 
@@ -300,19 +266,7 @@ class Vz_average {
 	 */
     public function max()
     {
-        // Must specify the entry id
-        if ($this->EE->TMPL->fetch_param('entry_id'))
-        {
-            $entry_id = $this->EE->TMPL->fetch_param('entry_id');
-        }
-        else
-        {
-            return '<!-- You must specify an entry_id. -->';
-        }
-        
-        $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
-        $data = $this->_get_data($entry_id, $entry_type);
-        
+        $data = $this->_get_data();
         return $data['max'];
     }
 
@@ -321,6 +275,20 @@ class Vz_average {
 	 */
     public function count()
     {
+        $data = $this->_get_data();
+        return $data['count'];
+    }
+	
+	// ----------------------------------------------------------------
+
+	/**
+	 * Add up the ratings and return an average
+	 */
+    private function _get_data()
+    {
+        // Make sure we don't try to run this when we don't have access to the template
+        if (!isset($this->EE->TMPL)) return;
+        
         // Must specify the entry id
         if ($this->EE->TMPL->fetch_param('entry_id'))
         {
@@ -331,26 +299,17 @@ class Vz_average {
             return '<!-- You must specify an entry_id. -->';
         }
         
+        // Get the other tag parameters
         $entry_type = $this->EE->TMPL->fetch_param('entry_type', 'channel');
-        $data = $this->_get_data($entry_id, $entry_type);
+        $site_id = $this->EE->TMPL->fetch_param('site_id', '1');
         
-        return $data['count'];
-    }
-	
-	// ----------------------------------------------------------------
-
-	/**
-	 * Add up the ratings and return an average
-	 */
-    private function _get_data($entry_id, $entry_type)
-    {
-        if (!$entry_id || !$entry_id) return;
-        
-        // Have there been any ratings for this entry?
+        // Run the DB query
         $this->EE->db->where('entry_id', $entry_id);
         $this->EE->db->where('entry_type', $entry_type);
+        $this->EE->db->where('site_id', $site_id);
         $count = $this->EE->db->count_all_results('exp_vz_average');
         
+        // Have there been any ratings for this entry?
         if ($count > 0)
         {
             // Get all the cumulative ratings information
