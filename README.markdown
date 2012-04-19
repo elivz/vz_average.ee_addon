@@ -91,7 +91,7 @@ Only show data for the current user, as determined by either IP address or logge
 
 Only show data for a particular member.
 
-### decimals = [integer] (only for {exp:vz_average:average})
+### decimals (only for {exp:vz_average:average})
 
 The number of decimal places to round the average to. Defaults to 0 (displays whole numbers).
 
