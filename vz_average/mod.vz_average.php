@@ -307,28 +307,41 @@ class Vz_average {
         $this->EE->db->where('entry_id', $entry_id);
         $this->EE->db->where('entry_type', $entry_type);
         $this->EE->db->where('site_id', $site_id);
-        $count = $this->EE->db->count_all_results('exp_vz_average');
         
-        // Have there been any ratings for this entry?
-        if ($count > 0)
+        // Limit to just ratings from one user, if necessary
+        $limit_by = $this->EE->TMPL->fetch_param('current_by', FALSE);
+        $member_id = $this->EE->TMPL->fetch_param('member_id', FALSE);
+        if ($limit_by == 'ip')
         {
-            // Get all the cumulative ratings information
-            $this->EE->db->select_avg('value', 'average');
-            $this->EE->db->select_sum('value', 'sum');
-            $this->EE->db->select_min('value', 'min');
-            $this->EE->db->select_max('value', 'max');
-            $this->EE->db->where('entry_id', $entry_id);
-            $this->EE->db->where('entry_type', $entry_type);
-            $query = $this->EE->db->get('exp_vz_average');
+            $ip = $this->EE->input->ip_address();
+            $this->EE->db->where('ip', $ip);
+        }
+        elseif ($limit_by == 'member')
+        {
+            // Make sure there IS a logged in member
+            if (!isset($this->EE->session))
+            {
+                return array('average' => 0, 'sum' => 0, 'min' => 0, 'max' => 0, 'count' => 0);
+            }
             
-            $data = $query->row_array();
-            $data['count'] = $count;
-            return $data;
+            $member_id = $this->EE->session->userdata('member_id');
+            $this->EE->db->where('user_id', $member_id);
         }
-        else
+        elseif ($member_id)
         {
-            return array('average' => 0, 'sum' => 0, 'min' => 0, 'max' => 0, 'count' => 0);
+            $this->EE->db->where('user_id', $member_id);
         }
+        
+        // Get all the cumulative ratings information
+        $this->EE->db->select_avg('value', 'average');
+        $this->EE->db->select_sum('value', 'sum');
+        $this->EE->db->select_min('value', 'min');
+        $this->EE->db->select_max('value', 'max');
+        $this->EE->db->select('COUNT(`value`) AS count');
+        $query = $this->EE->db->get('exp_vz_average');
+        
+        $data = $query->row_array();
+        return $data;
     }
 	
 }

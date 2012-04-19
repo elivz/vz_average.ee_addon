@@ -83,6 +83,14 @@ The type of entry to be displayed. This defaults to `channel`.
 
 In a multi-site environment, set this to the ID number of the current site. Defaults to 1.
 
+### current_by = [ip|member]
+
+Only show data for the current user, as determined by either IP address or member ID.
+
+### member_id = [integer]
+
+Only show data for a particular member.
+
 ### decimals = [integer] (only for {exp:vz_average:average})
 
 The number of decimal places to round the average to. Defaults to 0 (displays whole numbers).
@@ -192,5 +200,4 @@ In no particular order, these are features I hope to add in the relatively near 
 * Add more data outputs including [weighted scoring](http://evanmiller.org/how-not-to-sort-by-average-rating.html) for better entry sorting.
 * More/better code examples for different scenarios.
 * Use the current entry if no entry_id is set.
-* Template tags providing access to the current user's previous ratings.
 * Hooks (what do y'all want?)
