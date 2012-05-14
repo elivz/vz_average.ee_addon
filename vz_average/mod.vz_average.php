@@ -95,7 +95,7 @@ class Vz_average {
         }
         
         $value = $this->EE->input->post('value');
-        if (!empty($value) && is_numeric($value))
+        if (is_numeric($value))
         {
             $value = intval($value, 10);
         }
@@ -158,7 +158,16 @@ class Vz_average {
         $this->EE->db->query($sql);
         
         // Recalculate the cumulative data
-        $cumulative = $this->_get_data($entry_id, $entry_type);
+        $this->EE->db->where('entry_id', $entry_id);
+        $this->EE->db->where('entry_type', $entry_type);
+        $this->EE->db->where('site_id', $site_id);
+        $this->EE->db->select_avg('value', 'average');
+        $this->EE->db->select_sum('value', 'sum');
+        $this->EE->db->select_min('value', 'min');
+        $this->EE->db->select_max('value', 'max');
+        $this->EE->db->select('COUNT(`value`) AS count');
+        $query = $this->EE->db->get('exp_vz_average');
+        $cumulative = $query->row_array();
         
         // Do we need to update a custom field?
         if ($entry_type == 'channel' && $settings['update_field'])

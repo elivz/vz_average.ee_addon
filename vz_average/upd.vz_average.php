@@ -18,7 +18,7 @@
 
 class Vz_average_upd {
 	
-	public $version = '0.6.0';
+	public $version = '0.6.1';
 	
 	private $EE;
 	
