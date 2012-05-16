@@ -190,7 +190,7 @@ class Vz_average {
                 $field_id = $row->field_id;
                 
                 $type = in_array($settings['update_with'], array('average', 'sum', 'min', 'max', 'count')) ? $settings['update_with'] : 'average';
-                
+
                 // Update the field
                 $this->EE->db->update(
                     'exp_channel_data',
@@ -208,9 +208,6 @@ class Vz_average {
         }
         else
         {
-            // Remove their XID hash
-            $this->EE->security->delete_xid();
-            
             // Redirect to the specified page
             $redirect = !empty($settings['return']) ?
                 $this->EE->functions->create_url($settings['return']) :
