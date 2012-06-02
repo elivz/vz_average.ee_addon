@@ -64,6 +64,7 @@ class Vz_average {
         $settings['limit_by'] = $this->EE->TMPL->fetch_param('limit_by');
         $settings['min'] = $this->EE->TMPL->fetch_param('min');
         $settings['max'] = $this->EE->TMPL->fetch_param('max');
+        $settings['since'] = $this->EE->TMPL->fetch_param('since');
         $settings['update_field'] = $this->EE->TMPL->fetch_param('update_field');
         $settings['update_with'] = $this->EE->TMPL->fetch_param('update_with');
         $form_details['hidden_fields']['form_settings'] = base64_encode(serialize($settings));
@@ -161,6 +162,19 @@ class Vz_average {
         $this->EE->db->where('entry_id', $entry_id);
         $this->EE->db->where('entry_type', $entry_type);
         $this->EE->db->where('site_id', $site_id);
+        
+        // Set a date limit, if necessary
+        $before = strtotime($settings['before'], $this->EE->localize->now);
+        if ($before) $this->EE->db->where('date <=', date("Y-m-d H:i:s", $before));
+        $after = strtotime($settings['after'], $this->EE->localize->now);
+        if ($after) $this->EE->db->where('date >=', date("Y-m-d H:i:s", $after));
+
+        if ($since = strtotime($settings['since'], $this->EE->localize->now))
+        {
+            $since = date("Y-m-d H:i:s", $since);
+            $this->EE->db->where('date >=', $since);
+        }
+
         $this->EE->db->select_avg('value', 'average');
         $this->EE->db->select_sum('value', 'sum');
         $this->EE->db->select_min('value', 'min');
@@ -315,8 +329,8 @@ class Vz_average {
         $this->EE->db->where('site_id', $site_id);
         
         // Limit to just ratings from one user, if necessary
-        $limit_by = $this->EE->TMPL->fetch_param('current_by', FALSE);
-        $member_id = $this->EE->TMPL->fetch_param('member_id', FALSE);
+        $limit_by = $this->EE->TMPL->fetch_param('current_by');
+        $member_id = $this->EE->TMPL->fetch_param('member_id');
         if ($limit_by == 'ip')
         {
             $ip = $this->EE->input->ip_address();
@@ -338,6 +352,12 @@ class Vz_average {
             $this->EE->db->where('user_id', $member_id);
         }
         
+        // Set a date limit, if necessary
+        $before = strtotime($this->EE->TMPL->fetch_param('before'), $this->EE->localize->now);
+        if ($before) $this->EE->db->where('date <=', date("Y-m-d H:i:s", $before));
+        $after = strtotime($this->EE->TMPL->fetch_param('after'), $this->EE->localize->now);
+        if ($after) $this->EE->db->where('date >=', date("Y-m-d H:i:s", $after));
+
         // Get all the cumulative ratings information
         $this->EE->db->select_avg('value', 'average');
         $this->EE->db->select_sum('value', 'sum');

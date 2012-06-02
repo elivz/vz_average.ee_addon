@@ -65,6 +65,10 @@ The `update_field` parameter lets you store the resulting average (or sum, max, 
 
 The type of calculation to save in the custom field. This can be one of: `average`, `sum`, `min`, `max`, or `count`.
 
+### since, before = [relative or absolute date]
+
+If the `before` or `after` parameters are set, the updated field will be filled with data calculated using only the ratings from a certain time period. Either of these parameters can take any value that is able to be parsed with [PHP's strtotime](http://php.net/manual/en/function.strtotime.php) function.
+
 
 {exp:vz_average:average}, {exp:vz_average:sum}, {exp:vz_average:min}, {exp:vz_average:max}, {exp:vz_average:count}
 ------------------------------------------------------------------------------------------------------------------
@@ -98,6 +102,10 @@ The number of decimal places to round the average to. Defaults to 0 (displays wh
 ### min, max (only for {exp:vz_average:average})
 
 If you specify a `min` and a `max`, the `{exp:vz_average:average}` tag will return a percentage rather than a fixed number. This is particularly useful for generating bar graphs, as can be seen in the first example below.
+
+### before, after = [relative or absolute date]
+
+If the `before` or `after` parameters are set, the returned number will be calculated with only the ratings from a certain time period. Either of these parameters can take any value that is able to be parsed with [PHP's strtotime](http://php.net/manual/en/function.strtotime.php) function.
 
 
 AJAX
