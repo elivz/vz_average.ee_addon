@@ -164,13 +164,21 @@ class Vz_average {
         $this->EE->db->where('site_id', $site_id);
         
         // Set a date limit, if necessary
-        $before = strtotime($settings['before'], $this->EE->localize->now);
-        if ($before) $this->EE->db->where('date <=', date("Y-m-d H:i:s", $before));
-        $after = strtotime($settings['after'], $this->EE->localize->now);
-        if ($after) $this->EE->db->where('date >=', date("Y-m-d H:i:s", $after));
-
-        if ($since = strtotime($settings['since'], $this->EE->localize->now))
+        if (isset($settings['before']))
         {
+            $before = strtotime($settings['before'], $this->EE->localize->now);
+            $this->EE->db->where('date <=', date("Y-m-d H:i:s", $before));
+        }
+
+        if (isset($settings['after']))
+        {
+            $after = strtotime($settings['after'], $this->EE->localize->now);
+            $this->EE->db->where('date >=', date("Y-m-d H:i:s", $after));
+        }
+
+        if (isset($settings['since']))
+        {
+            $since = strtotime($settings['since'], $this->EE->localize->now);
             $since = date("Y-m-d H:i:s", $since);
             $this->EE->db->where('date >=', $since);
         }

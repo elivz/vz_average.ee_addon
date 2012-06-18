@@ -207,5 +207,4 @@ In no particular order, these are features I hope to add in the relatively near 
 * Support saving data to more than one custom field at a time.
 * Add more data outputs including [weighted scoring](http://evanmiller.org/how-not-to-sort-by-average-rating.html) for better entry sorting.
 * More/better code examples for different scenarios.
-* Use the current entry if no entry_id is set.
 * Hooks (what do y'all want?)
