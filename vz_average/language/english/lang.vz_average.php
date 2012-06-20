@@ -1,15 +1,10 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 $lang = array(	
-	'vz_average_module_name' => 
-	'VZ Average',
 
-	'vz_average_module_description' => 
-	'VZ Average Module',
-
-	'module_home' => 'VZ Average Home',
-	
-// Start inserting custom language keys/values here
+'vz_average_module_name' => 'VZ Average',
+'vz_average_module_description' => 'VZ Average Module',
+'module_home' => 'VZ Average Home',
 	
 );
 
