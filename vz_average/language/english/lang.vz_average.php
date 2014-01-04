@@ -8,5 +8,5 @@ $lang = array(
 	
 );
 
-/* End of file lang.vz_average.php */
-/* Location: /system/expressionengine/third_party/vz_average/language/english/lang.vz_average.php */
+/* End of file vz_average_lang.php */
+/* Location: /system/expressionengine/third_party/vz_average/language/english/vz_average_lang.php */

@@ -1,5 +1,5 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
- 
+
 // ------------------------------------------------------------------------
 
 /**
@@ -13,15 +13,15 @@
  * @copyright   Copyright (c) 2012 Eli Van Zoeren
  * @license     http://creativecommons.org/licenses/by-sa/3.0/ Attribution-Share Alike 3.0 Unported
  */
- 
+
 // ------------------------------------------------------------------------
 
 class Vz_average_upd {
-	
-	public $version = '0.7.1';
-	
+
+	public $version = '0.7.2';
+
 	private $EE;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -29,9 +29,9 @@ class Vz_average_upd {
 	{
 		$this->EE =& get_instance();
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	/**
 	 * Installation Method
 	 *
@@ -46,14 +46,14 @@ class Vz_average_upd {
 			'has_publish_fields'	=> 'n'
 		);
 		$this->EE->db->insert('modules', $mod_data);
-		
+
 		# Add an action for the AJAX update
 		$data = array(
         	'class'		=> 'Vz_average' ,
         	'method'	=> 'rate'
         );
         $this->EE->db->insert('actions', $data);
-		
+
 		// Create a new table to hold our data
         $this->EE->load->dbforge();
         $fields = array(
@@ -69,69 +69,69 @@ class Vz_average_upd {
         $this->EE->dbforge->add_field($fields);
         $this->EE->dbforge->add_key('entry_id', TRUE);
         $this->EE->dbforge->create_table('vz_average');
-        
+
         return TRUE;
 	}
 
 	// ----------------------------------------------------------------
-	
+
 	/**
 	 * Uninstall
 	 *
 	 * @return 	boolean 	TRUE
-	 */	
+	 */
 	public function uninstall()
 	{
         $mod_id = $this->EE->db->select('module_id')
 					->get_where('modules', array(
 						'module_name'	=> 'Vz_average'
 					))->row('module_id');
-		
+
         $this->EE->db->where('module_id', $mod_id)
                     ->delete('module_member_groups');
-		
+
         $this->EE->db->where('module_name', 'Vz_average')
                     ->delete('modules');
-		
+
         // Remove our custom action
         $this->EE->db->where('class', 'Vz_average');
         $this->EE->db->delete('actions');
-        
+
         // Remove the data table
         $this->EE->load->dbforge();
         $this->EE->dbforge->drop_table('vz_average');
-        
+
         return TRUE;
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	/**
 	 * Module Updater
 	 *
 	 * @return 	boolean 	TRUE
-	 */	
+	 */
 	public function update($current='')
 	{
 		if ($this->version == $current) return FALSE;
-		
+
         $this->EE->load->dbforge();
-        
+
         if (version_compare($current, '0.6', '<')) $this->_update_060();
-    
+
         return TRUE;
 	}
-	
+
 	/**
 	 * Add 'site_id' database column
 	 */
 	private function _update_060()
-	{	
+	{
         $this->EE->dbforge->add_column('vz_average', array(
         	'site_id' => array('type' => 'int', 'constraint' => 5, 'null' => FALSE),
         ), 'entry_type');
     }
-	
+
 }
 /* End of file upd.vz_average.php */
 /* Location: /system/expressionengine/third_party/vz_average/upd.vz_average.php */
