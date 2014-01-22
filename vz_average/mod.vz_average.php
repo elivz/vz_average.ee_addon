@@ -106,18 +106,11 @@ class Vz_average {
         }
 
         // Differentiate between duplicate IDs
-        $entry_type = $this->EE->input->post('entry_type');
-        $site_id = $this->EE->input->post('site_id');
-
-        // Make sure it is a valid POST from the front-end
-        if ($this->EE->security->check_xid($this->EE->input->post('XID')) == FALSE)
-        {
-            // No data insertion if a hash isn't found or is too old
-            $this->EE->functions->redirect($this->EE->functions->form_backtrack());
-        }
+        $entry_type = $this->EE->input->post('entry_type', TRUE);
+        $site_id = $this->EE->input->post('site_id', TRUE);
 
         // Decode the form settings
-        $settings = unserialize(base64_decode($this->EE->input->post('form_settings')));
+        $settings = unserialize(base64_decode($this->EE->input->post('form_settings', TRUE)));
 
         // Store information about the user, to prevent duplicates
         $user_id = $this->EE->session->userdata('member_id');
@@ -230,18 +223,22 @@ class Vz_average {
         }
         else
         {
-            // Redirect to the specified page
-            $redirect = !empty($settings['return']) ?
-                $this->EE->functions->create_url($settings['return']) :
-                $this->EE->functions->form_backtrack();
-
-            // Use the https version if they set 'secure_return'
-            if ($settings['secure_return'] == 'yes')
-            {
-                $redirect = str_replace('http://', 'https://', $redirect);
+            if (($return_url = $settings['return']) != '') {
+                // Redirect to the specified page
+                $return_url = $this->EE->functions->create_url($return_url);
+            } elseif (isset($this->EE->session->tracker[0])) {
+                // Return to previous page
+                $return_url = $this->EE->functions->create_url($this->EE->session->tracker[0]);
+            } else {
+                $return_url = $this->EE->functions->fetch_site_index();
             }
 
-            $this->EE->functions->redirect($redirect);
+            // Use secure version if necessary
+            if ($settings['secure_return'] == 'yes') {
+                $return_url = str_replace('http://', 'https://', $return_url);
+            }
+
+            $this->EE->functions->redirect($return_url);
         }
 
         exit;
